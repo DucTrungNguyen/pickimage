@@ -19,7 +19,7 @@ class PickImage  {
     final List<dynamic> response =
     await _channel.invokeMethod('getImageFromGallery', args);
 
-    print(response[0]);
+    // print(response[0]);
     return response;
   }
 

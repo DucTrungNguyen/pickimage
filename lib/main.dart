@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image/list_image.dart';
+import 'package:image/take_image.dart';
 
 import 'PickImage.dart';
 
@@ -60,9 +62,23 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: RaisedButton(child: Text('Get image'), onPressed: () async{
-           await PickImage.getImageFromGallery();
-        },)
+        child: Column(
+          children: [
+
+            RaisedButton(child: Text('Get image'), onPressed: () async{
+              var listImage = await PickImage.getImageFromGallery();
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>ListImage(listImage: listImage)));
+
+            },),
+            RaisedButton(child: Text('Pick image'), onPressed: () async{
+              var image = await PickImage.getImageFromCamera();
+              var pathImage = Uri.parse(image).path;
+              print('abc $pathImage');
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>TakeImage(image: image)));
+            },)
+
+          ],
+        )
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,

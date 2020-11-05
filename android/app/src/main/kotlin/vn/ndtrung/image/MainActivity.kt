@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -26,9 +25,10 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterActivity(){
 
     private val CHANNEL = "vn.ndtrung.image/pick_image"
+    private lateinit var _result: MethodChannel.Result
     private var imageFilePath: File? = null
     private var imageUri: Uri? = null
 
@@ -40,6 +40,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             run {
                 resultCall(call, result)
+//                success
 
             }
 
@@ -49,29 +50,43 @@ class MainActivity : FlutterActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.M)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            getAllShownImagesPath(activity)
+//            _result.success(arrayImage);
+
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun resultCall(@NonNull call: MethodCall, result: MethodChannel.Result) {
 
         Log.d("ABc", call.method)
+        _result = result
 
         if (call.method == "getImageFromGallery") {
             Log.d("vao method", "Vao method getImageFromGallery")
 
-            val arrayImage = getAllShownImagesPath(activity)
-            result.success(arrayImage);
+             getAllShownImagesPath(activity)
+//            result.success(arrayImage);
 
         }else
         if (call.method == "getImageFromCamera") {
 
             Log.d("vao method", "vao method getImageFromCamera")
-            val uri =  takePhoto()
-            result.success(uri)
+
+             takePhoto()
+
         }
 
 
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun getAllShownImagesPath(activity: Activity): ArrayList<String?>? {
+    private fun getAllShownImagesPath(activity: Activity) {
         val uri: Uri
         val cursor: Cursor?
         val column_index_data: Int
@@ -81,6 +96,12 @@ class MainActivity : FlutterActivity() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             val permission = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+//            ActivityCompat.requestPermissions(
+//                    this,
+//                     String[]{
+//                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                    },
+//                    [either SAVE or SAVE_AND_SHARE]);
             requestPermissions(permission, 10)
 //             requestPermissions(permission, 10)
         } else {
@@ -97,29 +118,27 @@ class MainActivity : FlutterActivity() {
                 absolutePathOfImage = cursor.getString(column_index_data)
                 listOfAllImages.add(absolutePathOfImage)
             }
+
+            _result.success(listOfAllImages)
         }
-        return listOfAllImages
+//        return listOfAllImages
     }
 
-    fun takePhoto() : Uri? {
+    fun takePhoto() {
         val pictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (pictureIntent.resolveActivity(activity.getPackageManager()) != null) {
             try {
                 imageFilePath = createImageFile()
             } catch (e: IOException) {
+                Log.d("cath", e.toString())
                 e.printStackTrace()
-                return imageUri 
+
             }
             val photoUri = imageFilePath?.let { FileProvider.getUriForFile(context, context.getPackageName().toString() + ".provider", it) }
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(pictureIntent, 100)
-
-            if (imageUri != null){
-                return imageUri
-
-            }
         }
-        return imageUri
+
     }
 
     @Throws(IOException::class)
@@ -140,6 +159,8 @@ class MainActivity : FlutterActivity() {
          if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
             imageUri = Uri.fromFile(imageFilePath)
             Log.d("Paths image", imageUri.toString())
+             _result.success(imageUri!!.path)
+
 
         }
     }
