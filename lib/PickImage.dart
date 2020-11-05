@@ -15,35 +15,23 @@ class PickImage  {
   static Future<List<dynamic>> getImageFromGallery(
     ) async {
     Map<String, dynamic> args;
-    // if (Platform.isIOS) {
-    //   args = <String, dynamic>{
-    //     "stickerImage": imagePath,
-    //     "backgroundTopColor": backgroundTopColor,
-    //     "backgroundBottomColor": backgroundBottomColor,
-    //     "attributionURL": attributionURL
-    //   };
-    // } else {
-    //   // // final tempDir = await getTemporaryDirectory();
-    //   //
-    //   // File file = File(imagePath);
-    //   // Uint8List bytes = file.readAsBytesSync();
-    //   // var stickerdata = bytes.buffer.asUint8List();
-    //   // String stickerAssetName = 'stickerAsset.png';
-    //   // final Uint8List stickerAssetAsList = stickerdata;
-    //   // final stickerAssetPath = '${tempDir.path}/$stickerAssetName';
-    //   // file = await File(stickerAssetPath).create();
-    //   // file.writeAsBytesSync(stickerAssetAsList);
-    //   // args = <String, dynamic>{
-    //   //   "stickerImage": stickerAssetName,
-    //   //   "backgroundTopColor": backgroundTopColor,
-    //   //   "backgroundBottomColor": backgroundBottomColor,
-    //   //   "attributionURL": attributionURL
-    //   // };
-    // }
+
     final List<dynamic> response =
     await _channel.invokeMethod('getImageFromGallery', args);
 
-    print(response.length);
+    print(response[0]);
+    return response;
+  }
+
+  static Future<dynamic> getImageFromCamera(
+      ) async {
+    Map<String, dynamic> args;
+
+    print('vao getImageFromCamera');
+    final dynamic response =
+    await _channel.invokeMethod('getImageFromCamera', args);
+
+    print(response);
     return response;
   }
 
